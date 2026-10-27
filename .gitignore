@@ -1,0 +1,9 @@
+# Claves de Wi-Fi y Firebase de la central: nunca subirlas
+codigo_central/secretos.h
+
+# APK compilada (se publica aparte, en Releases)
+*.apk
+
+# Registros de Firebase CLI
+app/firebase/registro.txt
+firebase-debug.log

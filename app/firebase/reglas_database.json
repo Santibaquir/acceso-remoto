@@ -1,0 +1,15 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    "estado": {
+      ".write": "auth != null",
+      "armado": { ".validate": "newData.isBoolean()" },
+      "alerta": { ".validate": "newData.isBoolean()" },
+      "ultimoLatido": { ".validate": "newData.isNumber()" }
+    },
+    "historial": {
+      ".write": "auth != null",
+      ".indexOn": ["fecha"]
+    }
+  }
+}

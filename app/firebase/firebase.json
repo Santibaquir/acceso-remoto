@@ -1,0 +1,10 @@
+{
+  "database": {
+    "rules": "reglas_database.json"
+  },
+  "auth": {
+    "providers": {
+      "anonymous": true
+    }
+  }
+}

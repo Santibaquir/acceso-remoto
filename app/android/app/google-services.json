@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "342070366063",
+    "project_id": "acceso-remoto-5777",
+    "storage_bucket": "acceso-remoto-5777.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:342070366063:android:5bb44d0800068fb520e29a",
+        "android_client_info": {
+          "package_name": "co.edu.umanizales.acceso_remoto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCK9JX3PyC-Qv6G4E-wkXXWZKsFI01GuPA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
