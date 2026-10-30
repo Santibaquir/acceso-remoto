@@ -1,8 +1,10 @@
-name: acceso_remoto
-description: "App móvil de la central de monitoreo Acceso Remoto"
+name: tiguard
+description: "TiGuard — app de vigilancia de TiGuard Secure"
 publish_to: 'none'
 
-version: 1.0.0+1
+# versión visible + número de compilación. Súbelo en CADA actualización
+# (1.1.0+2 → 1.1.1+3 ...): Android no instala un número igual o menor.
+version: 2.0.0+3
 
 environment:
   sdk: ^3.13.7
@@ -27,6 +29,8 @@ dependencies:
   shared_preferences: ^2.5.6
   # Abrir la app de la cámara Wi-Fi
   external_app_launcher: ^4.0.4
+  # Versión de la app en Ajustes
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +42,4 @@ flutter:
 
   assets:
     - assets/sonidos/
+    - assets/marca/

@@ -1,53 +1,44 @@
-# Acceso Remoto — App móvil
+# TiGuard — de TiGuard Secure
 
-Proyecto universitario de microcontroladores (Universidad de Manizales). Este repositorio es la **app móvil** de una central de monitoreo inalámbrica. El usuario se llama Tiba. Responde siempre en español.
+Proyecto universitario de microcontroladores (Universidad de Manizales) que evolucionó a producto: **TiGuard**, la app de **TiGuard Secure** (antes "Acceso Remoto"; ese nombre ya no se usa en textos nuevos). El usuario se llama Tiba. Responde siempre en español.
+
+## Regla número uno
+
+**Antes de cambiar la app, el firmware o Firebase, lee [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) y síguelo.** Ahí están las carpetas, las capas de la app, el contrato de datos de Firebase, el protocolo de radio, la seguridad y la lista de verificación de cambios. Si algo nuevo no encaja, primero se actualiza ese documento.
 
 ## Qué es el sistema
 
-Central de monitoreo que detecta movimiento con sensores infrarrojos y avisa al celular de inmediato, para abrir a tiempo la cámara comercial y verificar la intrusión.
+Vigilancia por zonas: cada **nodo de vigilancia** (Placa Arduino Nano + Sensor de movimiento PIR HC-SR501 + Módulo transceptor NRF24L01) avisa por radio de 2.4 GHz a la **central** (Placa de desarrollo ESP32-S DevKit con Módulo de reloj RTC DS3231, Módulo relé, zumbador/sirena, pulsador y pantalla LCD). La central publica en **Firebase** y manda push. Respaldo futuro: Módulo GSM SIM800L (con regulador LM2596) por SMS.
 
-Valor agregado: radiofrecuencia independiente del Wi-Fi, vigilancia por horarios nocturnos, montaje profesional sin protoboards y comunicación híbrida anti-sabotaje.
+Valor agregado: radiofrecuencia independiente del Wi-Fi, horario de vigilancia configurable desde la app, varios nodos con nombre, varias cuentas y celulares por central, montaje profesional sin protoboards.
 
-### Hardware (dos bloques unidos por radio a 2.4 GHz)
+## La app TiGuard (Flutter, `app/`)
 
-- **Nodo Remoto (la Bodega):** Placa Arduino Nano + Sensor de movimiento PIR HC-SR501 + Módulo transceptor NRF24L01. Envía la alerta "BODEGA" a la central.
-- **Estación Central (cuarto del Patrón):** Placa de desarrollo ESP32-S DevKit (USB Tipo C) sobre placa de expansión con borneras. Incluye Módulo transceptor NRF24L01 receptor, Módulo de reloj RTC DS3231 (vigilancia solo de 10:00 PM a 6:00 AM, configurable), Módulo relé y zumbador/sirena. Pantalla LCD comprada, se usará en la central.
-- **Respaldo GSM:** Módulo GSM SIM800L (con regulador LM2596) enviando SMS si cae el Wi-Fi. Aún no adquirido, va al final.
+- Inicio de sesión con correo y contraseña (misma cuenta en varios celulares).
+- Vincular una central con su ID y código (se ven en la pantalla LCD de la central).
+- Estado **ARMADO / DESARMADO**, armar y desarmar.
+- **Alerta de movimiento** (no "alerta crítica"): tarjeta roja sobria + push con el nombre del nodo, también con la app cerrada.
+- Nodos: agregar, renombrar, activar/desactivar, eliminar.
+- Horario de vigilancia configurable (o todo el día).
+- Ver cámara (abre la app comercial de la cámara Wi-Fi), conexión de la central, historial por nodo.
 
-### Lógica de alertas
+## Herramientas en el PC
 
-1. Vía principal: la Placa de desarrollo ESP32 se conecta al Wi-Fi y publica el estado de los sensores en **Firebase**.
-2. Vía de respaldo: si falla el Wi-Fi, envía SMS por el Módulo GSM SIM800L.
+Flutter en `C:\Users\santi\dev\flutter`, Android Studio con SDK, `arduino-cli` del Arduino IDE (`C:\Program Files\Arduino IDE\resources\app\lib\backend\resources\arduino-cli.exe`), Firebase CLI con sesión iniciada.
 
-## La app
+## Diseño
 
-Se reemplaza la versión planeada en MIT App Inventor por una app en **código**, con diseño cuidado y bonito. Lee Firebase en tiempo real.
-
-Funciones requeridas:
-
-- Estado del sistema: **ARMADO** / **DESARMADO**, bien visible.
-- Alerta crítica: sirena sonora + pantalla/texto rojo **"¡ALERTA CRÍTICA: BODEGA!"**, incluso con la app en segundo plano (notificación push).
-- Botones para **armar / desarmar** remotamente (escriben en Firebase, la Placa de desarrollo ESP32 los lee).
-- Botón **"Ver Cámara"**: abre la app comercial de la cámara Wi-Fi mediante intent / deep link.
-- Estado de conexión de la central (en línea / sin conexión, última vez visto).
-- Historial de alertas con fecha y hora.
-
-## Decisiones técnicas (a confirmar con Tiba si cambian)
-
-- Stack: **Flutter** (Android primero, carpeta `app/`) + **Firebase Realtime Database** + sesión anónima. Estructura: `estado/armado`, `estado/alerta`, `estado/ultimoLatido`, `historial/{id}` (detalle en `app/README.md`).
-- Push: la Placa de desarrollo ESP32 lo envía directo por FCM (librería FirebaseClient, cuenta de servicio, plan Spark gratis) al tema `alertas`, canal `alertas_criticas` con sonido `sirena`.
-- Claves del firmware en `codigo_central/secretos.h` (no se sube; plantilla en `secretos_ejemplo.h`).
-- Herramientas en el PC: Flutter en `C:\Users\santi\dev\flutter`, Android Studio con SDK, arduino-cli del Arduino IDE.
-- Diseño: tema oscuro tipo centro de seguridad, rojo reservado para alertas, verde para sistema armado/normal, tipografía grande y legible, animaciones sutiles. Debe verse profesional, no como prototipo.
+Tema oscuro tipo centro de seguridad, profesional (no prototipo). Rojo solo para alertas de movimiento, verde para armado, ámbar para sin conexión, verde TiGuard (`Colores.marca`, del logo) para acciones y marca. Tipografía grande y legible, animaciones sutiles. Colores y textos de marca solo en `app/lib/nucleo/`. Logos oficiales en `marca/`; en la app, `assets/marca/isotipo.png` e íconos del launcher ya aplicados.
 
 ## Estado actual (octubre 2026)
 
-- Fase de protoboard. Etapa 1 (enlace NRF24L01) y etapa 2 (RTC DS3231 en la Placa de desarrollo ESP32) probadas. Sigue etapa 3 (zumbador y relé).
-- El nodo remoto vuelve a usar Placa Arduino Nano (la Uno daba falsos contactos).
-- El firmware puede vivir en este repo, en `firmware/central` y `firmware/nodo`.
+- Fase de protoboard: enlace NRF24L01 y RTC DS3231 probados; sigue zumbador y relé.
+- Reforma 2.0 (TiGuard) terminada en software: multiusuario, multinodo, horario desde la app, logo aplicado, reglas de Firebase publicadas. APK en `entregas/TiGuard-2.0.0.apk`.
+- Lo que falta está en [PENDIENTES.md](PENDIENTES.md).
 
 ## Preferencias de Tiba
 
 - Nombrar los componentes con su **nombre completo** ("Sensor de movimiento PIR HC-SR501", "Placa de desarrollo ESP32"), nunca abreviados.
 - Correcciones breves y directas: aplicarlas de inmediato, sin explicaciones largas.
 - Es estudiante: código claro y comentado, explicar lo justo.
+- Trabajo profesional, escalable y seguro; no "proyecto simple".

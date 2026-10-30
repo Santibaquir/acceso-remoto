@@ -1,10 +1,11 @@
+// Tarjeta "Alerta de movimiento". Solo aparece cuando estado/alerta es true.
 import 'package:flutter/material.dart';
 
-import '../tema.dart';
+import '../nucleo/tema.dart';
 
-/// Banner rojo de alerta crítica. Solo aparece cuando `estado/alerta` es true.
+/// Diseño sobrio: fondo oscuro con tinte rojo, sin parpadeo agresivo.
 class TarjetaAlerta extends StatefulWidget {
-  final String sensor;
+  final String nodo;
   final String? hora;
   final bool sirenaSonando;
   final VoidCallback onVerCamara;
@@ -13,7 +14,7 @@ class TarjetaAlerta extends StatefulWidget {
 
   const TarjetaAlerta({
     super.key,
-    required this.sensor,
+    required this.nodo,
     required this.hora,
     required this.sirenaSonando,
     required this.onVerCamara,
@@ -27,110 +28,110 @@ class TarjetaAlerta extends StatefulWidget {
 
 class _TarjetaAlertaState extends State<TarjetaAlerta>
     with SingleTickerProviderStateMixin {
-  // Parpadeo del resplandor rojo
-  late final _parpadeo = AnimationController(
+  // Pulso lento del punto rojo (llama la atención sin exagerar)
+  late final _pulso = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 700),
+    duration: const Duration(milliseconds: 1400),
   )..repeat(reverse: true);
 
   @override
   void dispose() {
-    _parpadeo.dispose();
+    _pulso.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _parpadeo,
-      builder: (context, child) => Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: Colores.rojo.withValues(alpha: 0.25 + _parpadeo.value * 0.35),
-              blurRadius: 36,
-              spreadRadius: 1,
-            ),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 12, 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(Radios.tarjeta + 4),
+        border: Border.all(color: Colores.rojo.withValues(alpha: 0.45)),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colores.rojo.withValues(alpha: 0.20),
+            Colores.superficie,
           ],
         ),
-        child: child,
       ),
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFDC2626), Color(0xFF7F1D1D)],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded,
-                    color: Colors.white, size: 30),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    'MOVIMIENTO DETECTADO',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.w700,
-                    ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              AnimatedBuilder(
+                animation: _pulso,
+                builder: (context, _) => Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colores.rojo,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colores.rojo.withValues(alpha: 0.3 + _pulso.value * 0.5),
+                        blurRadius: 6 + _pulso.value * 8,
+                      ),
+                    ],
                   ),
                 ),
-                IconButton(
-                  tooltip: widget.sirenaSonando ? 'Silenciar' : 'Silenciada',
-                  onPressed: widget.sirenaSonando ? widget.onSilenciar : null,
-                  icon: Icon(
-                    widget.sirenaSonando
-                        ? Icons.volume_up_rounded
-                        : Icons.volume_off_rounded,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '¡ALERTA CRÍTICA: ${widget.sensor}!',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 26,
-                height: 1.15,
-                fontWeight: FontWeight.w900,
               ),
-            ),
-            if (widget.hora != null) ...[
-              const SizedBox(height: 6),
-              Text(
-                'Detectado a las ${widget.hora}',
-                style: const TextStyle(color: Colors.white70, fontSize: 15),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'ALERTA DE MOVIMIENTO',
+                  style: TextStyle(
+                    color: Colores.rojo,
+                    fontSize: 12,
+                    letterSpacing: 1.8,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: widget.sirenaSonando ? 'Silenciar' : 'Silenciada',
+                onPressed: widget.sirenaSonando ? widget.onSilenciar : null,
+                icon: Icon(
+                  widget.sirenaSonando
+                      ? Icons.volume_up_rounded
+                      : Icons.volume_off_rounded,
+                  color: widget.sirenaSonando ? Colores.texto : Colores.textoTenue,
+                ),
               ),
             ],
-            const SizedBox(height: 18),
-            Row(
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Text(
+              'Movimiento en ${widget.nodo}',
+              style: const TextStyle(
+                fontSize: 24,
+                height: 1.2,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          if (widget.hora != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Detectado a las ${widget.hora}',
+              style: const TextStyle(color: Colores.textoSuave, fontSize: 15),
+            ),
+          ],
+          const SizedBox(height: 18),
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Row(
               children: [
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: widget.onVerCamara,
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFFB91C1C),
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
+                      backgroundColor: Colores.rojo,
+                      minimumSize: const Size.fromHeight(50),
                     ),
                     icon: const Icon(Icons.videocam_rounded),
                     label: const Text('Ver cámara'),
@@ -141,24 +142,15 @@ class _TarjetaAlertaState extends State<TarjetaAlerta>
                   child: OutlinedButton(
                     onPressed: widget.onReconocer,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.white54),
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      minimumSize: const Size.fromHeight(50),
                     ),
                     child: const Text('Reconocer'),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

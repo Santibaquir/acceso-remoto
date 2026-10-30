@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Colores nativos de TiGuard (iguales a Colores.fondo de app/lib/nucleo/tema.dart) -->
+<resources>
+    <color name="ic_launcher_background">#0A0E17</color>
+    <color name="fondo_tiguard">#080B10</color>
+</resources>

@@ -1,9 +1,10 @@
+// Indicador "Central en línea" / "Central sin conexión · vista hace...".
 import 'package:flutter/material.dart';
 
-import '../modelos.dart';
-import '../tema.dart';
+import '../nucleo/formato.dart';
+import '../nucleo/tema.dart';
+import 'comunes.dart';
 
-/// Indicador "Central en línea" / "Central sin conexión · visto hace...".
 class ChipConexion extends StatelessWidget {
   final bool enLinea;
   final DateTime? ultimoLatido;
@@ -37,31 +38,16 @@ class ChipConexion extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 9,
-            height: 9,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color,
-              boxShadow: [BoxShadow(color: color, blurRadius: 8)],
-            ),
-          ),
+          PuntoEstado(color),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               detalle,
-              style: TextStyle(
-                color: color,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
-          Icon(
-            enLinea ? Icons.wifi_rounded : Icons.wifi_off_rounded,
-            color: color,
-            size: 18,
-          ),
+          Icon(enLinea ? Icons.wifi_rounded : Icons.wifi_off_rounded,
+              color: color, size: 18),
         ],
       ),
     );

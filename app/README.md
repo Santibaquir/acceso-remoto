@@ -1,41 +1,52 @@
-# Acceso Remoto — App Android
+# TiGuard — App Android
 
-App en Flutter que lee la central en tiempo real desde Firebase.
+App de **TiGuard Secure** en Flutter. Lee y controla las centrales TiGuard en
+tiempo real desde Firebase.
 
-## Estructura de la base de datos (Realtime Database)
+> La arquitectura completa (capas, contrato de datos, seguridad) está en
+> [`docs/ARQUITECTURA.md`](../docs/ARQUITECTURA.md). Léela antes de cambiar código.
 
-| Ruta                   | Tipo   | Quién escribe | Para qué |
-|------------------------|--------|---------------|----------|
-| `estado/armado`        | bool   | App           | La Placa de desarrollo ESP32 solo hace sonar la sirena si es `true` |
-| `estado/alerta`        | bool   | ESP32 → `true`, App → `false` | Alerta activa hasta que se reconoce en la app |
-| `estado/ultimoLatido`  | número (ms) | ESP32 cada 30 s | En línea / sin conexión (más de 90 s sin latido = sin conexión) |
-| `historial/{id}`       | `{ sensor: "BODEGA", fecha: ms }` | ESP32 | Historial con fecha y hora |
+## Funciones
 
-Las fechas las pone el servidor de Firebase (`{".sv": "timestamp"}`), no el reloj del celular.
+- Cuenta con correo y contraseña: la misma cuenta en varios celulares.
+- Vincular una o varias centrales con su ID y código de vinculación.
+- Armar / desarmar, alerta de movimiento con sirena y notificación push.
+- Nodos de vigilancia: agregar, renombrar, activar / desactivar, eliminar.
+- Horario de vigilancia configurable (o las 24 horas).
+- Historial por nodo, miembros de la central, botón para abrir la cámara.
 
-## Notificación push
+## Carpetas de `lib/`
 
-La ESP32 envía el push por Firebase Cloud Messaging al tema **`alertas`**, con
-`android.notification.channel_id = "alertas_criticas"` y `sound = "sirena"`.
-La app se suscribe a ese tema al abrirse y crea el canal con el sonido de sirena.
+| Carpeta | Qué contiene |
+|---------|--------------|
+| `nucleo/` | Marca, colores, formatos de fecha, errores |
+| `modelos/` | Clases de datos (estado, nodo, horario, historial...) |
+| `datos/` | Repositorios de Firebase y demo. Único lugar con rutas |
+| `estado/` | Sesión: usuario, centrales y central elegida |
+| `servicios/` | Notificaciones, sirena, cámara |
+| `pantallas/` | Una carpeta por pantalla |
+| `widgets/` | Piezas visuales reutilizables |
 
 ## Configurar Firebase (una sola vez)
 
-1. Entra a <https://console.firebase.google.com> → **Agregar proyecto** (plan Spark, gratis).
-2. **Compilación → Realtime Database → Crear base de datos** (ubicación `us-central1`, modo bloqueado).
-   En la pestaña **Reglas** pega el contenido de `firebase/reglas_database.json` y publica.
-3. **Compilación → Authentication → Comenzar → Anónimo → Habilitar**.
-4. **Configuración del proyecto → Tus apps → Android**:
-   - Nombre del paquete: `co.edu.umanizales.acceso_remoto`
-   - Descarga `google-services.json` y cópialo en `app/android/app/google-services.json`.
-5. Para la ESP32: **Configuración del proyecto → Cuentas de servicio → Generar nueva clave privada**.
-   Ese JSON lleva el correo y la clave que usa el firmware. **No lo subas a GitHub.**
+1. **Authentication → Método de acceso → Correo electrónico/contraseña → Habilitar**
+   (o `firebase deploy --only auth` desde `firebase/`).
+2. Publicar las reglas: desde la carpeta `firebase/`, `firebase deploy --only database`.
+3. `app/android/app/google-services.json` debe ser el del proyecto (`acceso-remoto-5777`).
+4. Preparar la central: `node firebase/herramientas/generar_identidad.js` y grabar
+   `firmware/central`. Para probar sin hardware: `node firebase/herramientas/simular_central.js preparar`.
 
-## Compilar e instalar
+## Compilar
 
 ```bash
 flutter pub get
-flutter run
+flutter analyze
+flutter test
+flutter run                                  # con Firebase
+flutter run --dart-define=DEMO=true          # modo demo, sin Firebase
+flutter build apk --release                  # build/app/outputs/flutter-apk/app-release.apk
 ```
 
-Para generar el APK: `flutter build apk --release` → `build/app/outputs/flutter-apk/app-release.apk`.
+En modo demo cualquier correo con una contraseña de 8 caracteres entra; la
+central de ejemplo es `DEMO7K2M9Q` / `TIGUARD1`. Mantener presionado el logo
+del panel simula una alerta de movimiento.

@@ -1,9 +1,22 @@
 # Claves de Wi-Fi y Firebase de la central: nunca subirlas
-codigo_central/secretos.h
+firmware/central/secretos.h
+
+# Llaves de firma de la app
+app/android/key.properties
+*.jks
+*.keystore
+app/android/llave/
 
 # APK compilada (se publica aparte, en Releases)
 *.apk
 
 # Registros de Firebase CLI
-app/firebase/registro.txt
+firebase/herramientas/registro.txt
 firebase-debug.log
+database-debug.log
+
+# APKs entregados (se generan con flutter build apk); no se suben
+entregas/
+
+# Archivos temporales del compilador de Kotlin
+app/android/.kotlin/
