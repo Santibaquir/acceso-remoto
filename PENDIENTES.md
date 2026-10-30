@@ -4,13 +4,13 @@ Lista en orden. Marca cada casilla cuando la termines (`[ ]` → `[x]`).
 
 ## 1. Hoy: poner a andar la versión 2.0
 
-- [ ] **Apagar la sesión anónima en Firebase** (2 min).
+- [x] **Apagar la sesión anónima en Firebase** (2 min).
       Consola de Firebase → Authentication → Método de acceso → Anónimo → Deshabilitar.
 - [ ] **Instalar la app nueva** en el celular: `entregas/TiGuard-2.0.0.apk`.
       Se instala encima de la vieja (misma firma). La app vieja ya no funciona con Firebase.
 - [ ] **Crear tu cuenta** en la app (nombre, correo, contraseña) y abrir el
       correo de verificación que te llega.
-- [ ] **Revisar el Wi-Fi en `firmware/central/secretos.h`**: `WIFI_SSID` y
+- [x] **Revisar el Wi-Fi en `firmware/central/secretos.h`**: `WIFI_SSID` y
       `WIFI_PASSWORD` deben ser los de tu red de 2.4 GHz.
 - [ ] **Grabar la central** (`firmware/central/central.ino`) en la Placa de
       desarrollo ESP32. La librería ArduinoJson ya quedó instalada.
@@ -19,7 +19,7 @@ Lista en orden. Marca cada casilla cuando la termines (`[ ]` → `[x]`).
 - [ ] **Vincular la central** en la app: el ID y el código salen en la
       pantalla LCD al encenderla (o al tocar el pulsador sin alarma).
 - [ ] **Ponerle nombre al nodo** en la app: Nodos → N01 → Cambiar nombre → "Bodega".
-- [ ] **Borrar los datos viejos** de Acceso Remoto en Firebase:
+- [x] **Borrar los datos viejos** de Acceso Remoto en Firebase:
       `node firebase/herramientas/simular_central.js limpiar-viejo`
 
 ## 2. Pruebas (anota lo que falle)

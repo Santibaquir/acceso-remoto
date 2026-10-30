@@ -1,10 +1,4 @@
-// =====================================================================
-//  TiGuard — Central (Placa de desarrollo ESP32)          TiGuard Secure
-//  Recibe los nodos por radio, decide si hay alerta de movimiento y la
-//  publica en Firebase. Contrato de datos y protocolo de radio:
-//  docs/ARQUITECTURA.md (secciones 4 y 5). No cambiar rutas ni el
-//  mensaje de radio sin actualizar ese documento.
-// =====================================================================
+
 #include <SPI.h>
 #include <RF24.h>
 #include <Wire.h>
@@ -76,7 +70,7 @@ const int ZUMBADOR_OFF = LOW;
 const unsigned long DURACION_ALARMA = 10000;     // la alarma suena 10 segundos
 const unsigned long SILENCIO_PULSADOR = 5000;    // tras apagar con el pulsador se ignoran alertas 5 s
 const unsigned long DURACION_AVISO = 3000;       // los avisos se quedan 3 s en la pantalla
-const unsigned long DURACION_IDENTIDAD = 10000;  // ID y código en pantalla al encender
+const unsigned long DURACION_IDENTIDAD = 30000;  // ID y código en pantalla al encender
 
 const unsigned long CADA_LATIDO = 30000;          // avisa a la app que la central está en línea
 const unsigned long CADA_LECTURA_ESTADO = 3000;   // armado / desarmado / alerta reconocida
@@ -147,8 +141,15 @@ void mostrarLinea(int fila, const char *texto) {
   lcd->print(linea);
 }
 
-// Muestra un aviso en la pantalla durante unos milisegundos
-void aviso(const char *l0, const char *l1, unsigned long duracion = DURACION_AVISO) {
+unsigned long finIdentidad = 0;  // hasta cuándo se protege el ID en pantalla
+
+// Muestra un aviso en la pantalla durante unos milisegundos.
+// Mientras el ID y el código están en pantalla, solo los avisos urgentes
+// (movimiento, pulsador, radio) los reemplazan; los demás se omiten.
+void aviso(const char *l0, const char *l1, unsigned long duracion = DURACION_AVISO,
+           bool urgente = false) {
+  if (!urgente && (long)(finIdentidad - millis()) > 0) return;
+  if (urgente) finIdentidad = millis();  // el aviso urgente quita la protección
   mostrarLinea(0, l0);
   mostrarLinea(1, l1);
   finAviso = millis() + duracion;
@@ -164,7 +165,8 @@ void mostrarIdentidad() {
   const char *cod = CODIGO_VINCULACION;
   snprintf(l0, sizeof(l0), "ID  %s", CENTRAL_ID);
   snprintf(l1, sizeof(l1), "COD %.4s-%.4s", cod, cod + 4);
-  aviso(l0, l1, DURACION_IDENTIDAD);
+  aviso(l0, l1, DURACION_IDENTIDAD, true);
+  finIdentidad = millis() + DURACION_IDENTIDAD;
 }
 
 // =====================================================================
@@ -605,7 +607,7 @@ void atenderNodo(const MensajeNodo &msg) {
     activarAlarma();
     Serial.println(">>> ALERTA DE MOVIMIENTO <<<");
     publicarAlerta(nodo, ahora.hour(), ahora.minute());
-    aviso("MOVIMIENTO", l1);
+    aviso("MOVIMIENTO", l1, DURACION_AVISO, true);
   }
 }
 
@@ -691,7 +693,7 @@ void loop() {
       DateTime ahora = rtc.now();
       publicarDesactivacion(ahora.hour(), ahora.minute());
       Serial.println("Alarma apagada con el pulsador");
-      aviso("Alarma apagada", "con el pulsador");
+      aviso("Alarma apagada", "con el pulsador", DURACION_AVISO, true);
     } else {
       mostrarIdentidad();
     }
@@ -716,7 +718,7 @@ void loop() {
     ultimaRevisionRadio = millis();
     if (!radio.isChipConnected() || radio.getChannel() != CANAL_RADIO) {
       Serial.println("Radio colgado: reconfigurando...");
-      aviso("Radio colgado", "Reconfigurando");
+      aviso("Radio colgado", "Reconfigurando", DURACION_AVISO, true);
       configurarRadio();
     }
   }

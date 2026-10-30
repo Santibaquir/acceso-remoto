@@ -32,7 +32,7 @@ const uint8_t CANAL_RADIO = 108;
 
 // ---------- Tiempos ----------
 const unsigned long CALENTAMIENTO_PIR = 30000;     // el sensor necesita 30 s al encender
-const unsigned long ESPERA_ENTRE_ALERTAS = 3000;   // máx. una alerta cada 3 s
+const unsigned long ESPERA_ENTRE_ALERTAS = 10000;   // máx. una alerta cada 10 s
 const unsigned long CADA_LATIDO = 300000;          // "sigo vivo" cada 5 minutos
 
 unsigned long ultimoEnvio = 0;
@@ -53,10 +53,18 @@ void setup() {
   pinMode(PIN_PIR, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  if (!radio.begin()) {
-    Serial.println("NRF24L01 no detectado");
-    while (1);
+  // Si el Módulo transceptor NRF24L01 no responde, se reintenta cada 2 s en vez
+  // de quedarse colgado. Mientras tanto el LED de la placa parpadea rápido
+  // (sirve para diagnosticar el nodo sin computador).
+  while (!radio.begin() || !radio.isChipConnected()) {
+    Serial.println("NRF24L01 no detectado: revisar 3.3V, condensador y cables CE=9 CSN=10 SCK=13 MOSI=11 MISO=12");
+    for (int i = 0; i < 10; i++) {
+      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+      delay(100);
+    }
+    digitalWrite(LED_BUILTIN, LOW);
   }
+  Serial.println("NRF24L01 detectado");
   radio.setPALevel(RF24_PA_LOW);
   radio.setDataRate(RF24_250KBPS);
   radio.setChannel(CANAL_RADIO);
