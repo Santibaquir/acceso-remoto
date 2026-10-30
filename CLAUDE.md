@@ -6,6 +6,16 @@ Proyecto universitario de microcontroladores (Universidad de Manizales) que evol
 
 **Antes de cambiar la app, el firmware o Firebase, lee [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md) y síguelo.** Ahí están las carpetas, las capas de la app, el contrato de datos de Firebase, el protocolo de radio, la seguridad y la lista de verificación de cambios. Si algo nuevo no encaja, primero se actualiza ese documento.
 
+## Grafo del proyecto (graphify) — consultar antes de explorar
+
+El proyecto ya está mapeado en `graphify-out/` (944 nodos: app, firmware, Firebase, docs, mockups y logos). **No revises el proyecto desde cero:** primero pregunta al grafo y abre solo los archivos que señale.
+
+- Panorama: leer [graphify-out/GRAPH_REPORT.md](graphify-out/GRAPH_REPORT.md) (comunidades, nodos clave, conexiones).
+- Pregunta: `graphify query "<pregunta>" --budget 1500` (con `PYTHONIOENCODING=utf-8` en Windows).
+- Un símbolo o concepto: `graphify explain "CentralRepositorio"`. Camino entre dos: `graphify path "atenderNodo()" "PantallaPanel"`.
+- Después de cambiar código: `graphify update .` (sin costo, solo AST). Si cambian docs, imágenes o firmware `.ino` (graphify los lee como documentos), re-ejecutar la skill graphify con `--update`.
+- La skill está en `C:\Users\santi\dev\graphify` (instalada con pip en Python 3.12).
+
 ## Qué es el sistema
 
 Vigilancia por zonas: cada **nodo de vigilancia** (Placa Arduino Nano + Sensor de movimiento PIR HC-SR501 + Módulo transceptor NRF24L01) avisa por radio de 2.4 GHz a la **central** (Placa de desarrollo ESP32-S DevKit con Módulo de reloj RTC DS3231, Módulo relé, zumbador/sirena, pulsador y pantalla LCD). La central publica en **Firebase** y manda push. Respaldo futuro: Módulo GSM SIM800L (con regulador LM2596) por SMS.
